@@ -242,3 +242,16 @@ fuel <- data.frame(fl = c("c","d","e","p","r"),
 fuel
 fuel <- left_join(mpg,fuel, by = "fl")
 fuel
+
+#데이터 합치기 practice
+library(ggplot2)
+library(dplyr)
+midwest
+midwest %>% 
+  select(popadults, poptotal) %>% 
+  head(10)
+midwest$adole_per <- (midwest$poptotal-midwest$popadults)/midwest$popadults*100
+midwest %>% 
+  select(county,popadults,poptotal,adole_per) %>% 
+  arrange(desc(adole_per)) %>% 
+  head(5)
