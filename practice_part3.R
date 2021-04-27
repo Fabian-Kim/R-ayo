@@ -83,3 +83,75 @@ ggplot(data = mpg_cl, aes(x = class,
                        y = cty))+
   geom_boxplot()
 
+
+#결측치(missing value) 정제하기
+##정제할 대상 <- 빠진 데이터, 이상한 데이터
+
+df <- data.frame(sex = c("m","f",NA,'m',"f"),
+                 score = c(5,4,3,4,NA))
+df
+
+is.na(df) # <- 결측치 확인
+table(is.na(df)) # <- 결측치 개수 확인
+
+library(dplyr)
+df %>% 
+  filter(is.na(score))
+df_nomiss <- df %>% 
+  filter(!is.na(score)&!is.na(sex))
+df_nomiss
+
+df_nomiss2 <- na.omit(df) # <- 모든 변수에 결측치 없는 것 추출, 실제로 많이 쓰지는 않음
+
+mean(df$score, na.rm = T) # <- 결측치 제외하고 평균
+sum(df$score, na.rm = T) # <- 결측치 제외한 합계
+
+exam <- read.csv("csv_exam.csv")
+head(exam,5)
+
+exam %>% 
+  summarise(mean_math = mean(math, na.rm = T),
+            sum_english = sum(english, na.rm = T),
+            median_science = median(science, na.re = T))
+
+
+#결측치 대체하기 (Imputation)
+#- 대표값으로 일괄 대체
+#- 예측값을 추정해서 대체
+#- 다른 변수들을 토대로 머신러닝 (최신 추세)
+exam$math <- ifelse(is.na(exam$math), 55, exam$math)
+table(is.na(exam$math))
+
+#결측치 practice
+mpg <- as.data.frame(ggplot2::mpg)
+mpg[c(65,124,131,153,212), "hwy"] <- NA
+
+table(is.na(mpg$drv))
+table(is.na(mpg$hwy))
+mpg %>% 
+  filter(!is.na(hwy)) %>% 
+  group_by(drv) %>% 
+  summarise(mean_hwy = mean(hwy))
+
+#이상치 정제하기 (Outlier)
+#- 존재할 수 없는 값, 극단적인 값
+
+#존재할 수 없는 값 걸러내기
+outlier <- data.frame(sex = c(1,2,1,3,2,1),
+                      score = c(5,4,3,4,2,6))
+table(outlier$sex)
+outlier$sex <- ifelse(outlier$sex == 3, NA, outlier$sex) # <- 이상치를 NA로 변경
+outlier$score <- ifelse(outlier$score > 5, NA, outlier$score)
+outlier %>% 
+  filter(!is.na(sex) & !is.na(score)) %>% 
+  group_by(sex) %>% 
+  summarise(mean_score = mean(score))
+
+#정상범위 외의 값 걸러내기
+mpg <- as.data.frame((ggplot2::mpg))
+boxplot(mpg$hwy)$stats # <- 상자그림의 수치 출력
+
+mpg$hwy <- ifelse(mpg$hwy < 12 | mpg$hwy > 37, NA, mpg$hwy)
+table(is.na(mpg$hwy))
+
+#이상치 정제 practice
