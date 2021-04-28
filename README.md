@@ -1,2 +1,2 @@
 # R-ayo
-a space for R
+a space for practice R
