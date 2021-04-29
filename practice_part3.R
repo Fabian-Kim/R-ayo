@@ -155,3 +155,97 @@ mpg$hwy <- ifelse(mpg$hwy < 12 | mpg$hwy > 37, NA, mpg$hwy)
 table(is.na(mpg$hwy))
 
 #이상치 정제 practice
+mpg <- as.data.frame(ggplot2::mpg)
+mpg[c(10,14,58,93), "drv"] <- "k"
+mpg[c(29,43,129,203), "cty"] <- c(3,4,39,42)
+
+##이상치 확인
+table(mpg$drv)
+##drv가 4,f,r 인 경우 제외하고 NA로 할당
+mpg$drv <- ifelse(mpg$drv %in% c("4","f","r"), mpg$drv, NA)
+##이상치 재확인
+table(mpg$drv)
+
+boxplot(mpg$cty)$stats
+mpg$cty <- ifelse(mpg$cty < 9 | mpg$cty > 26, NA, mpg$cty)
+boxplot(mpg$cty)
+
+#한국복지패널데이터
+install.packages("foreign")
+library(foreign)
+library(dplyr)
+library(ggplot2)
+raw_welfare <- read.spss("C:/Users/Fabian/Documents/RStudio/R-ayo/source/data_spss_Koweps2014.sav", to.data.frame = T)
+# <- 자주 불러오는 것보다 assign 해두고 복사하는 것이 효율성이 좋음
+welfare <- raw_welfare
+
+dim(welfare)
+str(welfare)
+head(welfare)
+
+welfare <- rename(welfare,
+                  sex = h0901_4, #성별
+                  birth = h0901_5, #출생연도
+                  income = h09_din) #소득
+
+class(welfare$sex)
+summary(welfare$sex)
+table(welfare$sex) # <- 무응답 9가 없음
+welfare$sex <- ifelse(welfare$sex == 1, "male","female")
+qplot(welfare$sex)
+
+class(welfare$income)
+summary(welfare$income)
+qplot(welfare$income)
+table(is.na(welfare$income))
+
+sex_income <- welfare %>% 
+  group_by(sex) %>% 
+  summarise(mean_income = mean(income))
+sex_income
+ggplot(data = sex_income, aes(x = sex,
+                              y = mean_income))+
+  geom_col()
+
+#생년변수 확인
+class(welfare$birth)
+summary(welfare$birth)
+qplot(welfare$birth)
+
+#나이변수 생성
+welfare$age <- 2014-welfare$birth+1
+summary(welfare$age)
+qplot(welfare$age)
+
+#나이별 소득 평균표
+age_income <- welfare %>% 
+  group_by(age) %>% 
+  summarise(mean_income = mean(income))
+age_income
+ggplot(data = age_income, aes(x = age,
+                              y = mean_income))+
+  geom_point()
+ 
+#연령대 변수 생성
+welfare <- welfare %>% 
+  mutate(ageg = ifelse(age < 30, "young",
+                        ifelse(age <= 59, "middle", "old")))
+table(welfare$ageg)
+qplot(welfare$ageg)
+
+#연령대별 소득 평균
+welfare_income <- welfare %>% 
+  filter(ageg !="young") %>% 
+  group_by(ageg) %>% 
+  summarise(mean_income = mean(income))
+welfare_income
+
+#연령대/성별에 따른 소득
+sex_income <- welfare %>% 
+  filter(ageg != "young") %>% 
+  group_by(ageg, sex) %>% 
+  summarise(mean_income = mean(income))
+ggplot(data = sex_income, aes(x = ageg,
+                              y = mean_income,
+                              fill = sex))+
+  geom_col(position = "dodge")
