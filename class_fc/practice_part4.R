@@ -53,3 +53,18 @@ var.test(groupA2[,2],groupB2[,2])
 
 #ttest
 t.test(groupA2[,2],groupB2[,2], alternative = "less", var.equal = F)
+
+### 대응표본t검정 <- 차이고려
+#file load
+raw_d <- read.csv(file = "C:/Users/Fabian/Documents/RStudio/R-ayo/class_fc/sourceData/htest02d.csv", header = T)
+raw_d
+groupAd <- raw_d[,1]
+groupBd <- raw_d[,2]
+
+#대응표본 티는 분산동질성 검증이 없음
+t.test(groupAd, groupBd, alternatve = "less", paired = T) # <- paired가 대응표본임을 나타냄
+
+#데이터 30이상일 경우 z검증
+
+#한글타자에러해
+Sys.setlocale("LC_COLLATE", "ko_KR.UTF-8")
