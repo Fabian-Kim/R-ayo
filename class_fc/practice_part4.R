@@ -166,3 +166,7 @@ chisq.test(rawTable, correct = F)
 #셀 기대도수 > 5 <- correct = F
 #셀 기대도수 < 5 <- correct = T
 
+
+install.packages("caret", dependencies = T)
+library(caret)
+expand.grid(k = 1:10)
